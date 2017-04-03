@@ -19,7 +19,12 @@ public class commandParser {
 	private int targetport;
 	private int repeattimes; // set 0 at disconnect
 
-	private static final String regex = "(dis)?connect\\((.+)\\)\\((.+)\\)(\\d+)?\\[(\\d+)?\\]";
+	// keepalive or url=/#q=
+	private String option;
+
+	// private static final String regex =
+	// "(dis)?connect\\((.+)\\)\\((.+)\\)(\\d+)?\\[(\\d+)?\\]";
+	private static final String regex = "(dis)?connect\\s([^\\s]+)\\s([^\\s]+)\\s?(\\d+)?\\s?(\\d+)?\\s?(keepalive|url=[^\\s]*)?";
 	private static final String IPregex = "((\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)):?(\\d+)?";
 
 	commandParser(String comm) {
@@ -44,6 +49,7 @@ public class commandParser {
 
 		slaveIdentifier = match.group(2);
 		targetIdentifier = match.group(3);
+		option = match.group(6);
 
 		if (connect) {
 			if (match.group(4) != null) {
@@ -81,6 +87,7 @@ public class commandParser {
 		System.out.println("targetIdentifier: " + targetIdentifier);
 		System.out.println("targetport (-1 means all ports (disconnection)): " + targetport);
 		System.out.println("repeattimes (0 means disconnection): " + repeattimes);
+		System.out.println("Additional option: " + option);
 
 		if (isValidIP(slaveIdentifier)) {
 			slaveIdentifierType = "IP";
@@ -166,6 +173,10 @@ public class commandParser {
 
 	public int getRepeattimes() {
 		return repeattimes;
+	}
+
+	public String getOption() {
+		return option;
 	}
 
 }

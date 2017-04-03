@@ -50,33 +50,20 @@ public class masterbot extends Thread {
 			while (true) {
 				String com = (new commandLine()).getCommand();
 				if (com.equals("list")) {
-					// Number of total slaves.
-					// System.out.println(slaves.size());
+					// remove unconnected slaves
+					removeUnconnect();
+					// list slave
 					listSlaves();
 				} else {
 					commandParser par = new commandParser(com);
 					if (par.isValid()) {
 						if (par.getSlaveIdentifier().equals("all")) {
-							List<Integer> removelist = new ArrayList<>();
+							removeUnconnect();
 							// send command to all slaves
 							for (int i = 0; i < getSize(); i++) {
-								if (!checkconnection(i)) {
-									System.out.println("Slave (" + i + ") is not connected now and will be removed.");
-									removelist.add(i);
-								} else {
-									new Thread(new MultiThreadServer(getElementSock(i), com)).start();
-									System.out.println("Master has successfully send command to slave " + i + ".");
-								}
+								new Thread(new MultiThreadServer(getElementSock(i), com)).start();
+								System.out.println("Master has successfully send command to slave " + i + ".");
 							}
-							if (removelist.size() > 0) {
-								System.out.println("Removing unconnected slaves.");
-								// delete in a reversed order
-								for (int j = removelist.size() - 1; j >= 0; j--) {
-									remover(removelist.get(j));
-								}
-								System.out.println("Removing finished.");
-							}
-
 						} else {
 							int index = getElementIndex(par.getSlaveIdentifier(), par.getSlaveIdentifierType(),
 									par.getSlaveport());
@@ -112,12 +99,33 @@ public class masterbot extends Thread {
 	}
 
 	// List all slaves information with this master server
-	public void listSlaves() {
+	public static void listSlaves() {
 		synchronized (slaves) {
 			System.out.println("SlaveName IPAddress Port RegistrationDate");
 			for (slave i : slaves) {
 				System.out.println(i.getName() + " " + i.getIPaddr() + " " + i.getSourcePortNumber() + " "
 						+ i.getRegistrationDate());
+			}
+		}
+	}
+
+	public static void removeUnconnect() {
+		synchronized (slaves) {
+			List<Integer> removelist = new ArrayList<>();
+			// send command to all slaves
+			for (int i = 0; i < getSize(); i++) {
+				if (!checkconnection(i)) {
+					System.out.println("Slave (" + i + ") is not connected now and will be removed.");
+					removelist.add(i);
+				}
+			}
+			if (removelist.size() > 0) {
+				System.out.println("Removing unconnected slaves.");
+				// delete in a reversed order
+				for (int j = removelist.size() - 1; j >= 0; j--) {
+					remover(removelist.get(j));
+				}
+				System.out.println("Removing finished.");
 			}
 		}
 	}
@@ -175,7 +183,7 @@ public class masterbot extends Thread {
 						new InputStreamReader(slaves.get(index).getSock().getInputStream()));
 				String buffer; // just few to test
 				if ((buffer = in.readLine()) != null) {
-					System.out.println(buffer);
+					// System.out.println(buffer);
 					return true;
 				} else {
 					return false;
