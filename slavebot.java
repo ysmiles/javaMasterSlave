@@ -139,7 +139,7 @@ public class slavebot extends Thread {
 				in.close();
 
 				System.out.println("Disconnect with " + myurlstring + " automatically.");
-				
+
 				return;
 			}
 
