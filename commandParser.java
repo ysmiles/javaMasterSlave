@@ -67,14 +67,14 @@ public class commandParser {
 			}
 
 		} else {
-			if (match.group(4) != null) {
+			if (match.group(5) != null) {
 				valid = false;
 				System.out.println("not valid");
 				return;
 			}
 
-			if (match.group(5) != null) {
-				targetport = Integer.parseInt(match.group(5));
+			if (match.group(4) != null) {
+				targetport = Integer.parseInt(match.group(4));
 			} else {
 				// means all, default for disconnection case
 				targetport = -1;
