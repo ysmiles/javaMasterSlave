@@ -9,7 +9,12 @@ public class commandParser {
 	private String slaveIdentifier; // can be hostname, IP, or all
 	private String slaveIdentifierType;
 
-	private boolean connect; // connect or not
+	// private boolean connect; // connect or not
+	// In version 3.0. change it to command type.
+	/*
+	 * 1. list 2. connect 3. disconnect 4. ipscan 5. tcpportscan
+	 */
+	private int commandType;
 
 	private String targetIdentifier; // can be hostname or IP
 	private String targetIdentifierType;
@@ -26,6 +31,8 @@ public class commandParser {
 	// "(dis)?connect\\((.+)\\)\\((.+)\\)(\\d+)?\\[(\\d+)?\\]";
 	private static final String regex = "(dis)?connect\\s([^\\s]+)\\s([^\\s]+)\\s?(\\d+)?\\s?(\\d+)?\\s?(keepalive|url=[^\\s]*)?";
 	private static final String IPregex = "((\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)):?(\\d+)?";
+	private static final String scanregex = "(ip|tcpport)?scan\\s([^\\s]+)\\s([^\\s]+)\\s?([^\\s]+)?";
+	private static final String rangeregex = "([^\\s]+)-([^\\s]+)?";
 
 	commandParser(String comm) {
 		Parser(comm);
@@ -37,21 +44,33 @@ public class commandParser {
 		valid = match.matches();
 
 		if (!valid) {
-			System.out.println("Not valid");
-			return;
+			patt = Pattern.compile(scanregex);
+			match = patt.matcher(com);
+			valid = match.matches();
+			if (!valid) {
+				System.out.println("Not valid");
+				return;
+			}
 		}
 
 		if (match.group(1) == null) {
-			connect = true;
-		} else {
-			connect = false;
+			commandType = 2;
+		} else if (match.group(1).equals("dis")) {
+			commandType = 3;
+		} else if (match.group(1).equals("ip")) {
+			commandType = 4;
+		} else if (match.group(1).equals("tcpport")) {
+			commandType = 5;
 		}
 
 		slaveIdentifier = match.group(2);
 		targetIdentifier = match.group(3);
-		option = match.group(6);
 
-		if (connect) {
+		if (commandType < 4) {
+			option = match.group(6);
+		}
+
+		if (commandType == 2) {
 			if (match.group(4) != null) {
 				targetport = Integer.parseInt(match.group(4));
 			} else {
@@ -66,7 +85,7 @@ public class commandParser {
 				repeattimes = 1; // default for connection case
 			}
 
-		} else {
+		} else if (commandType == 3) {
 			if (match.group(5) != null) {
 				valid = false;
 				System.out.println("not valid");
@@ -81,13 +100,17 @@ public class commandParser {
 			}
 			repeattimes = 0; // disconnect default
 		}
+		//TODO scan type
 
 		System.out.println("Command valid.");
 		System.out.println("slaveIdentifier: " + slaveIdentifier);
 		System.out.println("targetIdentifier: " + targetIdentifier);
-		System.out.println("targetport (-1 means all ports (disconnection)): " + targetport);
-		System.out.println("repeattimes (0 means disconnection): " + repeattimes);
-		System.out.println("Additional option: " + option);
+		if (commandType < 4) {
+			System.out.println("targetport (-1 means all ports (disconnection)): " + targetport);
+			System.out.println("repeattimes (0 means disconnection): " + repeattimes);
+			System.out.println("Additional option: " + option);
+		}
+		//TODO scan type
 
 		if (isValidIP(slaveIdentifier)) {
 			slaveIdentifierType = "IP";
@@ -98,6 +121,7 @@ public class commandParser {
 			slaveport = -1;
 		}
 
+		//TODO scan type
 		if (isValidIP(targetIdentifier)) {
 			targetIdentifierType = "IP";
 			if (ifHavePort(targetIdentifier) != -1) {
@@ -163,8 +187,8 @@ public class commandParser {
 		return targetIdentifierType;
 	}
 
-	public boolean isConnect() {
-		return connect;
+	public int getCommandType() {
+		return commandType;
 	}
 
 	public int getTargetport() {
@@ -177,6 +201,15 @@ public class commandParser {
 
 	public String getOption() {
 		return option;
+	}
+
+	public void correctUse() {
+		System.out.println("Correct use:");
+		System.out.println("list");
+		System.out.println("connect(IPAddressOrHostNameOfYourSlave|all)"
+				+ "(TargetHostName|IPAddress)TargetPortNumber[NumberOfConnections: 1 if not specified]");
+		System.out.println("disconnect(IPAddressOrHostNameOfYourSlave|all)"
+				+ "(TargetHostName|IPAddress)[TargetPort:all if no port specified]");
 	}
 
 }

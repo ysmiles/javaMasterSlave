@@ -48,33 +48,48 @@ public class masterbot extends Thread {
 	public void run() {
 		try {
 			while (true) {
+				// get new command
 				String com = (new commandLine()).getCommand();
+
+				// handle command
 				if (com.equals("list")) {
 					// remove unconnected slaves
 					removeUnconnect();
 					// list slave
 					listSlaves();
-				} else {
+				}
+				// parsing complex command
+				else {
+					// create a parser object
 					commandParser par = new commandParser(com);
+					// check if it is valid
 					if (par.isValid()) {
+						// send to all
 						if (par.getSlaveIdentifier().equals("all")) {
+							// remove unconnected slaves
 							removeUnconnect();
 							// send command to all slaves
 							for (int i = 0; i < getSize(); i++) {
-								new Thread(new MultiThreadServer(getElementSock(i), com)).start();
+								Socket thesocket = getElementSock(i);
+								new Thread(new commandSender(thesocket, com)).start();
+								new Thread(new msgReceiver(thesocket)).start();
 								System.out.println("Master has successfully send command to slave " + i + ".");
 							}
-						} else {
+						}
+						// send to a specific slave
+						else {
 							int index = getElementIndex(par.getSlaveIdentifier(), par.getSlaveIdentifierType(),
 									par.getSlaveport());
 							if (index != -1) {
 								Socket sock = getElementSock(index);
+								// still check connection first
 								if (!checkconnection(index)) {
 									System.out.println(
 											"Slave (" + index + ")is not connected now. Type 'list' to check again.");
 									remover(index);
 								} else {
-									new Thread(new MultiThreadServer(sock, com)).start();
+									new Thread(new commandSender(sock, com)).start();
+									new Thread(new msgReceiver(sock)).start();
 									System.out.println("Master has successfully send command to slave " + index + ".");
 								}
 							} else {
@@ -83,14 +98,11 @@ public class masterbot extends Thread {
 									System.out.println(" with the portnumber " + par.getSlaveport());
 							}
 						}
-					} else { // not valid command
-						System.out.println("Correct use:");
-						System.out.println("list");
-						System.out.println("connect(IPAddressOrHostNameOfYourSlave|all)"
-								+ "(TargetHostName|IPAddress)TargetPortNumber[NumberOfConnections: 1 if not specified]");
-						System.out.println("disconnect(IPAddressOrHostNameOfYourSlave|all)"
-								+ "(TargetHostName|IPAddress)[TargetPort:all if no port specified]");
 					}
+					// invalid command
+					else
+						par.correctUse();
+
 				}
 			}
 		} catch (IOException e) {
@@ -178,11 +190,13 @@ public class masterbot extends Thread {
 	public static boolean checkconnection(int index) {
 		synchronized (slaves) {
 			try {
-				new Thread(new MultiThreadServer(slaves.get(index).getSock(), "connection?")).start();
+				new Thread(new commandSender(slaves.get(index).getSock(), "connection?")).start();
 				BufferedReader in = new BufferedReader(
 						new InputStreamReader(slaves.get(index).getSock().getInputStream()));
 				String buffer; // just few to test
 				if ((buffer = in.readLine()) != null) {
+					// Because we just need to check connection, just discard
+					// the replied message
 					// System.out.println(buffer);
 					return true;
 				} else {

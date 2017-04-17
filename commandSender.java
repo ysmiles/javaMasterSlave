@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 
-public class MultiThreadServer implements Runnable {
+public class commandSender implements Runnable {
 	// client socket
 	Socket csocket;
 
@@ -13,7 +13,7 @@ public class MultiThreadServer implements Runnable {
 
 	// Constructor
 
-	MultiThreadServer(Socket csocket, String com) {
+	commandSender(Socket csocket, String com) {
 		this.csocket = csocket;
 		this.com = com;
 	}
@@ -22,8 +22,8 @@ public class MultiThreadServer implements Runnable {
 		try {
 			PrintStream pstream = new PrintStream(csocket.getOutputStream());
 			pstream.println(com);
-			// ref: http://stackoverflow.com/questions/8890303/behavior-of-java-sockets-when-closing-output-stream
-			// Closing the returned OutputStream will close the associated socket.
+			// Ref: http://stackoverflow.com/questions/8890303/behavior-of-java-sockets-when-closing-output-stream
+			// Closing the OutputStream will close the associated socket.
 			// pstream.close();
 			// Don't close socket
 			// csocket.close();
