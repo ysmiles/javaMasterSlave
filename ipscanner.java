@@ -37,36 +37,32 @@ public class ipscanner implements Runnable {
 	}
 
 	public void run() {
-		if (a == e && b == f) {
-			while (c < g) {
-				while (d < 256) {
-					testIP(a, b, c, d);
-					++d;
-				}
-				d = 0;
-				++c;
-			}
-			// c==g
-			while (d <= h) {
-				testIP(a, b, c, d);
-				++d;
-			}
-		} else {
-			System.out.println("ip range too large.");
+		String IPstring1 = new String(a + "." + b + "." + c + "." + d);
+		long iplong1 = ipToLong(IPstring1);
+		String IPstring2 = new String(e + "." + f + "." + g + "." + h);
+		long iplong2 = ipToLong(IPstring2);
+
+		for (; iplong1 <= iplong2; iplong1++) {
+			testIP(longToIP(iplong1));
 		}
 
 		sendToMaster();
-		
+
 		System.out.println("IPscanner finished.");
 	}
 
 	public void sendToMaster() {
-		String msg = "From slave: available ips are ";
+		String msg = "From slave: available ips are\n";
 		for (int i = 0; i < ips.size(); i++) {
 			msg += ips.get(i);
 			if (i != ips.size() - 1)
-				msg += ", ";
+				msg += ",";
 		}
+
+		if (ips.isEmpty()) {
+			msg += "None";
+		}
+
 		msg += "\n";
 		pstream.print(msg);
 	}
@@ -78,8 +74,8 @@ public class ipscanner implements Runnable {
 	//
 	// }
 
-	public void testIP(int a, int b, int c, int d) {
-		String IPstring = new String(a + "." + b + "." + c + "." + d);
+	public void testIP(String IPstring) {
+
 		System.out.println("Test " + IPstring);
 		try {
 			boolean isreachable = InetAddress.getByName(IPstring).isReachable(5000);
@@ -91,6 +87,24 @@ public class ipscanner implements Runnable {
 			System.out.println("IP " + IPstring + " is not reachable.");
 			// e.printStackTrace();
 		}
+	}
+
+	private long ipToLong(String ipAddress) {
+		String[] ipAddressInArray = ipAddress.split("\\.");
+
+		long result = 0;
+
+		for (int i = 0; i < ipAddressInArray.length; i++) {
+			int power = 3 - i;
+			int ip = Integer.parseInt(ipAddressInArray[i]);
+			result += ip * Math.pow(256, power);
+		}
+
+		return result;
+	}
+
+	private String longToIP(long ip) {
+		return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "." + ((ip >> 8) & 0xFF) + "." + (ip & 0xFF);
 	}
 
 }

@@ -47,12 +47,17 @@ public class portscanner implements Runnable {
 	}
 
 	public void sendToMaster() {
-		String msg = "From slave: available ports are ";
+		String msg = "From slave: available ports are\n";
 		for (int i = 0; i < ports.size(); i++) {
 			msg += ports.get(i).toString();
 			if (i != ports.size() - 1)
-				msg += ", ";
+				msg += ",";
 		}
+		
+		if(ports.isEmpty()){
+			msg += "None";
+		}
+		
 		msg += "\n";
 		pstream.print(msg);
 	}

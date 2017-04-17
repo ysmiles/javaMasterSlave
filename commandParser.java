@@ -117,8 +117,8 @@ public class commandParser {
 			Matcher mat = pat.matcher(targetIdentifier);
 			valid = mat.matches();
 			if (valid) {
-				//System.out.println(mat.group(1));
-				//System.out.println(mat.group(2));
+				// System.out.println(mat.group(1));
+				// System.out.println(mat.group(2));
 				ip1 = getIPints(mat.group(1));
 				ip2 = getIPints(mat.group(2));
 			} else {
@@ -157,17 +157,16 @@ public class commandParser {
 			System.out.println("targetport range: " + targetport + "-" + targetport2);
 		}
 
+		if (isValidIP(slaveIdentifier)) {
+			slaveIdentifierType = "IP";
+			slaveport = ifHavePort(slaveIdentifier);
+			slaveIdentifier = getPureIP(slaveIdentifier);
+		} else {
+			slaveIdentifierType = "hostname";
+			slaveport = -1;
+		}
 		// for connect and disconnect
 		if (commandType < 4) {
-			if (isValidIP(slaveIdentifier)) {
-				slaveIdentifierType = "IP";
-				slaveport = ifHavePort(slaveIdentifier);
-				slaveIdentifier = getPureIP(slaveIdentifier);
-			} else {
-				slaveIdentifierType = "hostname";
-				slaveport = -1;
-			}
-
 			if (isValidIP(targetIdentifier)) {
 				targetIdentifierType = "IP";
 				if (ifHavePort(targetIdentifier) != -1) {
@@ -180,6 +179,7 @@ public class commandParser {
 				targetIdentifierType = "hostname";
 			}
 		}
+		
 	}
 
 	public int getSlaveport() {

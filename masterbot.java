@@ -68,7 +68,6 @@ public class masterbot extends Thread {
 				}
 				// parsing complex command
 				else {
-
 					// check if it is valid
 					if (par.isValid()) {
 						// send to all
