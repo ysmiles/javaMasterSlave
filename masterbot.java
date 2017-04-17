@@ -40,9 +40,15 @@ public class masterbot extends Thread {
 			String dateString = dateFormat.format(new Date());
 			addElement(new slave(sock, dateString));
 
+			// Create a receiver
+			// 1. receive message from slave
+			// 2. check connection
+			new Thread(new msgReceiver(sock)).start();
+
 			System.out.println("Slave added into list");
 			System.out.print(">");
 		}
+
 	}
 
 	public void run() {
@@ -50,29 +56,29 @@ public class masterbot extends Thread {
 			while (true) {
 				// get new command
 				String com = (new commandLine()).getCommand();
+				// create a parser object
+				commandParser par = new commandParser(com);
 
 				// handle command
-				if (com.equals("list")) {
+				if (par.getCommandType() == 1) {
 					// remove unconnected slaves
-					removeUnconnect();
+					// removeUnconnect();
 					// list slave
 					listSlaves();
 				}
 				// parsing complex command
 				else {
-					// create a parser object
-					commandParser par = new commandParser(com);
+
 					// check if it is valid
 					if (par.isValid()) {
 						// send to all
 						if (par.getSlaveIdentifier().equals("all")) {
 							// remove unconnected slaves
-							removeUnconnect();
+							// removeUnconnect();
 							// send command to all slaves
 							for (int i = 0; i < getSize(); i++) {
 								Socket thesocket = getElementSock(i);
 								new Thread(new commandSender(thesocket, com)).start();
-								new Thread(new msgReceiver(thesocket)).start();
 								System.out.println("Master has successfully send command to slave " + i + ".");
 							}
 						}
@@ -83,15 +89,15 @@ public class masterbot extends Thread {
 							if (index != -1) {
 								Socket sock = getElementSock(index);
 								// still check connection first
-								if (!checkconnection(index)) {
-									System.out.println(
-											"Slave (" + index + ")is not connected now. Type 'list' to check again.");
-									remover(index);
-								} else {
-									new Thread(new commandSender(sock, com)).start();
-									new Thread(new msgReceiver(sock)).start();
-									System.out.println("Master has successfully send command to slave " + index + ".");
-								}
+								// if (!checkconnection(index)) {
+								// System.out.println(
+								// "Slave (" + index + ")is not connected now.
+								// Type 'list' to check again.");
+								// remover(index);
+								// } else {
+								new Thread(new commandSender(sock, com)).start();
+								System.out.println("Master has successfully send command to slave " + index + ".");
+								// }
 							} else {
 								System.out.println("Connot find the specific slave: " + par.getSlaveIdentifier());
 								if (par.getSlaveport() != -1)
@@ -121,26 +127,27 @@ public class masterbot extends Thread {
 		}
 	}
 
-	public static void removeUnconnect() {
-		synchronized (slaves) {
-			List<Integer> removelist = new ArrayList<>();
-			// send command to all slaves
-			for (int i = 0; i < getSize(); i++) {
-				if (!checkconnection(i)) {
-					System.out.println("Slave (" + i + ") is not connected now and will be removed.");
-					removelist.add(i);
-				}
-			}
-			if (removelist.size() > 0) {
-				System.out.println("Removing unconnected slaves.");
-				// delete in a reversed order
-				for (int j = removelist.size() - 1; j >= 0; j--) {
-					remover(removelist.get(j));
-				}
-				System.out.println("Removing finished.");
-			}
-		}
-	}
+	// public static void removeUnconnect() {
+	// synchronized (slaves) {
+	// List<Integer> removelist = new ArrayList<>();
+	// // send command to all slaves
+	// for (int i = 0; i < getSize(); i++) {
+	// if (!checkconnection(i)) {
+	// System.out.println("Slave (" + i + ") is not connected now and will be
+	// removed.");
+	// removelist.add(i);
+	// }
+	// }
+	// if (removelist.size() > 0) {
+	// System.out.println("Removing unconnected slaves.");
+	// // delete in a reversed order
+	// for (int j = removelist.size() - 1; j >= 0; j--) {
+	// remover(removelist.get(j));
+	// }
+	// System.out.println("Removing finished.");
+	// }
+	// }
+	// }
 
 	public static void addElement(slave s) {
 		synchronized (slaves) {
@@ -187,27 +194,29 @@ public class masterbot extends Thread {
 		}
 	}
 
-	public static boolean checkconnection(int index) {
-		synchronized (slaves) {
-			try {
-				new Thread(new commandSender(slaves.get(index).getSock(), "connection?")).start();
-				BufferedReader in = new BufferedReader(
-						new InputStreamReader(slaves.get(index).getSock().getInputStream()));
-				String buffer; // just few to test
-				if ((buffer = in.readLine()) != null) {
-					// Because we just need to check connection, just discard
-					// the replied message
-					// System.out.println(buffer);
-					return true;
-				} else {
-					return false;
-				}
-			} catch (IOException e) {
-				System.out.println(e);
-				return false;
-			}
-		}
-	}
+	// public static boolean checkconnection(int index) {
+	// synchronized (slaves) {
+	// try {
+	//
+	// return true;
+	// // BufferedReader in = new BufferedReader(
+	// // new
+	// // InputStreamReader(slaves.get(index).getSock().getInputStream()));
+	// // String buffer; // just few to test
+	// // if ((buffer = in.readLine()) != null) {
+	// // // Because we just need to check connection, just discard
+	// // // the replied message
+	// // // System.out.println(buffer);
+	// // return true;
+	// // } else {
+	// // return false;
+	// // }
+	// } catch (IOException e) {
+	// System.out.println(e);
+	// return false;
+	// }
+	// }
+	// }
 
 	public static boolean remover(int index) {
 		synchronized (slaves) {
@@ -220,4 +229,20 @@ public class masterbot extends Thread {
 			}
 		}
 	}
+
+	public static boolean removeBySocket(Socket s) {
+		synchronized (slaves) {
+			for (int i = 0; i < slaves.size(); i++) {
+				if (slaves.get(i).getSock().equals(s)) {
+					System.out.println("Removing: ");
+					System.out.println(slaves.get(i).getName() + " " + slaves.get(i).getIPaddr() + " "
+							+ slaves.get(i).getSourcePortNumber() + " " + slaves.get(i).getRegistrationDate());
+					slaves.remove(i);
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
 }

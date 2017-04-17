@@ -16,17 +16,25 @@ public class msgReceiver implements Runnable {
 
 	public void run() {
 		try {
-			System.out.println("A thread waiting for reply message from slave is created.");
+			System.out.println("\nA thread waiting for message from the slave is created.");
+			System.out.print(">");
 			// read input form server
 			BufferedReader in = new BufferedReader(new InputStreamReader(csocket.getInputStream()));
 			String inputLine;
-			while ((inputLine = in.readLine()) != null)
+			while ((inputLine = in.readLine()) != null){
+				System.out.print("\n");
 				System.out.println(inputLine);
-			
+				System.out.print(">");
+			}
 			// close socket if disconnected from client (read null from client)
 			csocket.close();
 			
-			System.out.println("Message receiver has been closed.");
+			System.out.println("\nDisconnection detected by message receiver.");
+
+			masterbot.removeBySocket(csocket);
+			
+			System.out.println("Receiver closed.");
+			System.out.print(">");
 
 		} catch (IOException e) {
 			System.out.println(e);
