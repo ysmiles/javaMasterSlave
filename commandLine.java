@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 
 public class commandLine {
 
-	public String getCommand() throws IOException {
-		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
-		System.out.print(">");
-		String s = bf.readLine();
-		return s;
-	}
+    public String getCommand() throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print(">");
+        String s = bf.readLine();
+        return s;
+    }
 }
