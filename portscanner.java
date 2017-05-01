@@ -63,7 +63,7 @@ public class portscanner implements Runnable {
 
         try {
             pstream.print(msg);
-        } catch (IOexception e) {
+        } catch (Exception e) {
             return -1;
         }
 

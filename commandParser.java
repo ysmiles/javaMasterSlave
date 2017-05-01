@@ -39,7 +39,7 @@ public class commandParser {
 	// "(dis)?connect\\((.+)\\)\\((.+)\\)(\\d+)?\\[(\\d+)?\\]";
 	private static final String regex = "(dis)?connect\\s([^\\s]+)\\s([^\\s]+)\\s?(\\d+)?\\s?(\\d+)?\\s?(keepalive|url=[^\\s]*)?";
 	private static final String IPregex = "((\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)):?(\\d+)?";
-	private static final String scanregex = "(ip|tcpport)?scan\\s([^\\s]+)\\s([^\\s]+)\\s?([^\\s]+)?";
+	private static final String scanregex = "(geoip|ip|tcpport)?scan\\s([^\\s]+)\\s([^\\s]+)\\s?([^\\s]+)?";
 	private static final String rangeregex = "([^\\s]+)-([^\\s]+)?";
 
 	commandParser(String comm) {
@@ -75,6 +75,8 @@ public class commandParser {
 			commandType = 4;
 		} else if (match.group(1).equals("tcpport")) {
 			commandType = 5;
+		} else if (match.group(1).equals("geoip")) {
+			commandType = 6;
 		}
 
 		slaveIdentifier = match.group(2);
@@ -179,7 +181,7 @@ public class commandParser {
 				targetIdentifierType = "hostname";
 			}
 		}
-		
+
 	}
 
 	public int getSlaveport() {

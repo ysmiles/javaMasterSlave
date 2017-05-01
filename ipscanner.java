@@ -11,24 +11,16 @@ public class ipscanner implements Runnable {
 	PrintStream pstream;
 	List<Integer> ip1;
 	List<Integer> ip2;
-	List<String> ips = new ArrayList<String>();
-	int a, b, c, d, e, f, g, h;
+	List<String> results = new ArrayList<String>();
+	List<String> geoinfo = new ArrayList<String>();
+	int flag;
 
-	ipscanner(List<Integer> ip1, List<Integer> ip2, Socket ms) {
+	ipscanner(List<Integer> ip1, List<Integer> ip2, Socket ms, int flag) {
 		try {
 			pstream = new PrintStream(ms.getOutputStream());
 			this.ip1 = ip1;
 			this.ip2 = ip2;
-
-			a = ip1.get(0);
-			b = ip1.get(1);
-			c = ip1.get(2);
-			d = ip1.get(3);
-
-			e = ip2.get(0);
-			f = ip2.get(1);
-			g = ip2.get(2);
-			h = ip2.get(3);
+			this.flag = flag;
 
 		} catch (IOException e) {
 			// Auto-generated catch block
@@ -37,15 +29,22 @@ public class ipscanner implements Runnable {
 	}
 
 	public void run() {
-		String IPstring1 = new String(a + "." + b + "." + c + "." + d);
+		String IPstring1 = listToIPstring(ip1);
 		long iplong1 = ipToLong(IPstring1);
-		String IPstring2 = new String(e + "." + f + "." + g + "." + h);
+		String IPstring2 = listToIPstring(ip2);
 		long iplong2 = ipToLong(IPstring2);
 
 		for (; iplong1 <= iplong2; iplong1++) {
 			testIP(longToIP(iplong1));
 		}
-
+		
+		if (flag == 1){
+			for (int i = 0; i < results.size(); i++){
+				// TODO
+				testgeo(results.get(i));
+			}
+		}
+		
 		sendToMaster();
 
 		System.out.println("IPscanner finished.");
@@ -53,26 +52,29 @@ public class ipscanner implements Runnable {
 
 	public void sendToMaster() {
 		String msg = "From slave: available ips are\n";
-		for (int i = 0; i < ips.size(); i++) {
-			msg += ips.get(i);
-			if (i != ips.size() - 1)
-				msg += ",";
+		if (flag == 0) {
+			for (int i = 0; i < results.size(); i++) {
+				msg += results.get(i);
+				if (i != results.size() - 1)
+					msg += ",";
+			}
+
+		} else if (flag == 1) {
+			for (int i = 0; i < results.size(); i++) {
+				msg += results.get(i);
+				if (i != results.size() - 1)
+					msg += "\n";
+			}
 		}
 
-		if (ips.isEmpty()) {
+		if (results.isEmpty()) {
 			msg += "None";
 		}
 
 		msg += "\n";
+
 		pstream.print(msg);
 	}
-
-	// public String iptostring(List<Integer> ip) {
-	// return new String(ip.get(0).toString() + "." + ip.get(1).toString() + "."
-	// + ip.get(2).toString() + "."
-	// + ip.get(3).toString());
-	//
-	// }
 
 	public void testIP(String IPstring) {
 
@@ -80,7 +82,7 @@ public class ipscanner implements Runnable {
 		try {
 			boolean isreachable = InetAddress.getByName(IPstring).isReachable(5000);
 			if (isreachable) {
-				ips.add(IPstring);
+				results.add(IPstring);
 			}
 		} catch (IOException e) {
 			// Auto-generated catch block
@@ -95,9 +97,9 @@ public class ipscanner implements Runnable {
 		long result = 0;
 
 		for (int i = 0; i < ipAddressInArray.length; i++) {
-			int power = 3 - i;
+			int powernum = 3 - i;
 			int ip = Integer.parseInt(ipAddressInArray[i]);
-			result += ip * Math.pow(256, power);
+			result += ip * Math.pow(256, powernum);
 		}
 
 		return result;
@@ -105,6 +107,26 @@ public class ipscanner implements Runnable {
 
 	private String longToIP(long ip) {
 		return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "." + ((ip >> 8) & 0xFF) + "." + (ip & 0xFF);
+	}
+
+	private String listToIPstring(List<Integer> ip) {
+		return (new String(ip.get(1) + "." + ip.get(2) + "." + ip.get(3) + "." + ip.get(4)));
+	}
+	
+	public void testgeo(String IPstring) {
+		//http://ip-api.com/csv/208.80.152.201
+		System.out.println("Test geoinfo of " + IPstring);
+		try {
+			String geostring;
+			//TODO do something with geostring
+			// URL class
+			
+			geoinfo.add(geostring);
+		} catch (IOException e) {
+			// Auto-generated catch block
+			System.out.println("IP " + IPstring + " is not reachable.");
+			// e.printStackTrace();
+		}
 	}
 
 }

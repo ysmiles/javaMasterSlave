@@ -112,14 +112,16 @@ public class slavebot extends Thread {
                     pstream.println("From slave: disconnection done.");
                 }
             }
-            // ipscan
-            else if (cmdtype == 4) {
+            // ipscan or geoipscan
+            else if (cmdtype == 4 || cmdtype == 6) {
                 System.out.println("Start ip scanning...");
                 pstream.println("From slave: ipscan start...");
+                
+                int flag = (cmdtype == 4) ? 0 : 1;
 
                 List<Integer> ip1 = par.getIp1();
                 List<Integer> ip2 = par.getIp2();
-                new Thread(new ipscanner(ip1, ip2, mastersock)).start();
+                new Thread(new ipscanner(ip1, ip2, mastersock, flag)).start();
 
             }
             // tcpportscan
