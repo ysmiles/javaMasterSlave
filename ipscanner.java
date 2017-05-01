@@ -1,9 +1,15 @@
 package masterslave;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,13 +47,18 @@ public class ipscanner implements Runnable {
 		if (flag == 1){
 			for (int i = 0; i < results.size(); i++){
 				// TODO
-				testgeo(results.get(i));
+				try {
+					geoinfo.add(testgeo(results.get(i)));
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		
 		sendToMaster();
 
-		System.out.println("IPscanner finished.");
+		System.out.println("(geo)IPscanner finished.");
 	}
 
 	public void sendToMaster() {
@@ -60,9 +71,9 @@ public class ipscanner implements Runnable {
 			}
 
 		} else if (flag == 1) {
-			for (int i = 0; i < results.size(); i++) {
-				msg += results.get(i);
-				if (i != results.size() - 1)
+			for (int i = 0; i < geoinfo.size(); i++) {
+				msg += geoinfo.get(i);
+				if (i != geoinfo.size() - 1)
 					msg += "\n";
 			}
 		}
@@ -110,22 +121,45 @@ public class ipscanner implements Runnable {
 	}
 
 	private String listToIPstring(List<Integer> ip) {
-		return (new String(ip.get(1) + "." + ip.get(2) + "." + ip.get(3) + "." + ip.get(4)));
+		return (new String(ip.get(0) + "." + ip.get(1) + "." + ip.get(2) + "." + ip.get(3)));
 	}
 	
-	public void testgeo(String IPstring) {
+	public String testgeo(String IPstring) throws InterruptedException {
 		//http://ip-api.com/csv/208.80.152.201
 		System.out.println("Test geoinfo of " + IPstring);
 		try {
 			String geostring;
 			//TODO do something with geostring
-			// URL class
 			
-			geoinfo.add(geostring);
+			// URL object creation
+			String myurlstring = "http://ip-api.com/csv/" + IPstring;
+            URL myurl = new URL(myurlstring);
+            URLConnection yc = myurl.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+            String inputLine;
+
+            // sleep 0.5 s
+            Thread.sleep(500);
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(baos);
+                 
+            // Discard all stuffs returned from server
+            while ((inputLine = in.readLine()) != null)
+				ps.print(inputLine);
+            
+            String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+            
+            // String[] contentArray = content.split("\\,");
+               
+            content  = IPstring + " " + content.substring(8);
+            
+			return content;
 		} catch (IOException e) {
 			// Auto-generated catch block
 			System.out.println("IP " + IPstring + " is not reachable.");
 			// e.printStackTrace();
+			return "NONE";
 		}
 	}
 

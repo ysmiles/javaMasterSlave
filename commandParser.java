@@ -17,7 +17,7 @@ public class commandParser {
 	 * 1. list 2. connect 3. disconnect 4. ipscan 5. tcpportscan
 	 */
 	private int commandType;
-	private static String[] types = { "list", "connect", "disconnect", "ipscan", "tcpportscan" };
+	private static String[] types = { "list", "connect", "disconnect", "ipscan", "tcpportscan","geoipscan" };
 
 	private String targetIdentifier; // can be hostname or IP
 	private String targetIdentifierType;
@@ -114,7 +114,7 @@ public class commandParser {
 				targetport = -1;
 			}
 			repeattimes = 0; // disconnect default
-		} else if (commandType == 4) {
+		} else if (commandType == 4 || commandType == 6) {
 			Pattern pat = Pattern.compile(rangeregex);
 			Matcher mat = pat.matcher(targetIdentifier);
 			valid = mat.matches();

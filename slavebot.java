@@ -115,7 +115,7 @@ public class slavebot extends Thread {
             // ipscan or geoipscan
             else if (cmdtype == 4 || cmdtype == 6) {
                 System.out.println("Start ip scanning...");
-                pstream.println("From slave: ipscan start...");
+                pstream.println("From slave: ipscan/geoipscan start...");
                 
                 int flag = (cmdtype == 4) ? 0 : 1;
 
