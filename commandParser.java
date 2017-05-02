@@ -291,6 +291,7 @@ public class commandParser {
 		System.out.println("4. ipscan(IPAddressOrHostNameOfYourSlave|all)(IPAddressRage)");
 		System.out.println("5. tcpportscan(IPAddressOrHostNameOfYourSlave|all)(TargetHostName|IPAddress)"
 				+ "TargetPortNumberRage");
+		System.out.println("6. geoipscan(IPAddressOrHostNameOfYourSlave|all)(IPAddressRage)");
 	}
 
 }

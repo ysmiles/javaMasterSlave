@@ -43,9 +43,9 @@ public class ipscanner implements Runnable {
 		for (; iplong1 <= iplong2; iplong1++) {
 			testIP(longToIP(iplong1));
 		}
-		
-		if (flag == 1){
-			for (int i = 0; i < results.size(); i++){
+
+		if (flag == 1) {
+			for (int i = 0; i < results.size(); i++) {
 				// TODO
 				try {
 					geoinfo.add(testgeo(results.get(i)));
@@ -55,7 +55,7 @@ public class ipscanner implements Runnable {
 				}
 			}
 		}
-		
+
 		sendToMaster();
 
 		System.out.println("(geo)IPscanner finished.");
@@ -90,15 +90,10 @@ public class ipscanner implements Runnable {
 	public void testIP(String IPstring) {
 
 		System.out.println("Test " + IPstring);
-		try {
-			boolean isreachable = InetAddress.getByName(IPstring).isReachable(5000);
-			if (isreachable) {
-				results.add(IPstring);
-			}
-		} catch (IOException e) {
-			// Auto-generated catch block
-			System.out.println("IP " + IPstring + " is not reachable.");
-			// e.printStackTrace();
+		boolean isreachable = pingIP(IPstring);
+		// InetAddress.getByName(IPstring).isReachable(5000);
+		if (isreachable) {
+			results.add(IPstring);
 		}
 	}
 
@@ -123,37 +118,34 @@ public class ipscanner implements Runnable {
 	private String listToIPstring(List<Integer> ip) {
 		return (new String(ip.get(0) + "." + ip.get(1) + "." + ip.get(2) + "." + ip.get(3)));
 	}
-	
+
 	public String testgeo(String IPstring) throws InterruptedException {
-		//http://ip-api.com/csv/208.80.152.201
+		// http://ip-api.com/csv/208.80.152.201
 		System.out.println("Test geoinfo of " + IPstring);
 		try {
-			String geostring;
-			//TODO do something with geostring
-			
 			// URL object creation
 			String myurlstring = "http://ip-api.com/csv/" + IPstring;
-            URL myurl = new URL(myurlstring);
-            URLConnection yc = myurl.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
-            String inputLine;
+			URL myurl = new URL(myurlstring);
+			URLConnection yc = myurl.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+			String inputLine;
 
-            // sleep 0.5 s
-            Thread.sleep(500);
-            
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(baos);
-                 
-            // Discard all stuffs returned from server
-            while ((inputLine = in.readLine()) != null)
+			// sleep 0.5 s
+			Thread.sleep(500);
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			PrintStream ps = new PrintStream(baos);
+
+			// Discard all stuffs returned from server
+			while ((inputLine = in.readLine()) != null)
 				ps.print(inputLine);
-            
-            String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
-            
-            // String[] contentArray = content.split("\\,");
-               
-            content  = IPstring + " " + content.substring(8);
-            
+
+			String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+
+			// String[] contentArray = content.split("\\,");
+
+			content = IPstring + " " + content.substring(8);
+
 			return content;
 		} catch (IOException e) {
 			// Auto-generated catch block
@@ -161,6 +153,34 @@ public class ipscanner implements Runnable {
 			// e.printStackTrace();
 			return "NONE";
 		}
+	}
+
+	private boolean pingIP(String ipstring) {
+		String pingCmd = "ping " + ipstring + " -w 5";
+		String pingResult = "";
+		try {
+			Runtime r = Runtime.getRuntime();
+			Process p = r.exec(pingCmd);
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				System.out.println(inputLine);
+				pingResult += inputLine;
+				if (inputLine.contains("time="))
+					return true;
+			}
+			in.close();
+
+			if (pingResult.contains("100% packet loss") || pingResult.contains("Unreachable"))
+				return false;
+
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+		return false;
+
 	}
 
 }
