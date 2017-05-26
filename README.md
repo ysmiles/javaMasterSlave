@@ -7,38 +7,43 @@ Go to the source folder "masterslave".
 Run "make" in terminal.
 
 Example:
+
 Run: (go up a folder first)
+
 java masterslave.masterbot -p 6000
+
 java masterslave.slavebot -p 6000 -h localhost
 
 Tested with following command at master side:
-// list all available slaves.
-list
-// let all slaves connect to www.sjsu.edu, each slave creats 1 connection.
-connect all www.sjsu.edu 80
-// let all slaves connect to www.sjsu.edu, each slave creats 2 connection.
-connect all www.sjsu.edu 80 2
-// let all slaves disconnect with www.sjsu.edu with port 80
-disconnect all www.sjsu.edu 80
-// let all slaves disconnect with www.sjsu.edu with all ports
-disconnect all www.sjsu.edu
-// add keepalive option
-connect all www.sjsu.edu 80 keepalive
-// creat random strings and let google search, drop all replies
-connect all www.google.com 80 2 url=/#q=
-// let all slaves test a range of IPs (by using ICMP echo)
-ipscan all 4.2.2.2-4.2.2.8
-// let specific slaves test a range of IPs (by using ICMP echo)
-ipscan 127.0.0.1 4.2.2.2-4.2.2.8
-// let specific slaves (chose by name) test a range of IPs (by using ICMP echo)
-ipscan localhost 4.2.2.2-4.2.2.8
-// let specific slaves (chose by name) test a range of TCP ports
-tcpportscan localhost www.sjsu.edu 79-81
-// let all slaves (chose by name) test a range of TCP ports
-tcpportscan all www.sjsu.edu 79-81
-// test geological information
-geoipscan all 4.2.2.2-4.2.2.8
+
+list // list all available slaves.
+
+connect all www.sjsu.edu 80 // let all slaves connect to www.sjsu.edu, each slave creats 1 connection.
+
+connect all www.sjsu.edu 80 2 // let all slaves connect to www.sjsu.edu, each slave creats 2 connection.
+
+disconnect all www.sjsu.edu 80 // let all slaves disconnect with www.sjsu.edu with port 80
+
+disconnect all www.sjsu.edu // let all slaves disconnect with www.sjsu.edu with all ports
+
+connect all www.sjsu.edu 80 keepalive // add keepalive option
+
+connect all www.google.com 80 2 url=/#q= // creat random strings and let google search, drop all replies
+
+ipscan all 4.2.2.2-4.2.2.8 // let all slaves test a range of IPs (by using ICMP echo)
+
+ipscan 127.0.0.1 4.2.2.2-4.2.2.8 // let specific slaves test a range of IPs (by using ICMP echo)
+
+ipscan localhost 4.2.2.2-4.2.2.8 // let specific slaves (chose by name) test a range of IPs (by using ICMP echo)
+
+tcpportscan localhost www.sjsu.edu 79-81 // let specific slaves (chose by name) test a range of TCP ports
+
+tcpportscan all www.sjsu.edu 79-81 // let all slaves (chose by name) test a range of TCP ports
+
+geoipscan all 4.2.2.2-4.2.2.8 // test geological information, similar formats as before
+
 geoipscan localhost 4.2.2.2-4.2.2.8
+
 geoipscan 127.0.0.1 208.80.153.203-208.80.153.205 
 
 
