@@ -47,16 +47,21 @@ geoipscan localhost 4.2.2.2-4.2.2.8
 geoipscan 127.0.0.1 208.80.153.203-208.80.153.205 
 
 
-Version 4.0
+### Version 4.0
+
 geoipscan 127.0.0.1 208.80.153.203-208.80.153.205
 // ip of wikipedia
 
-Version 3.0
+### Version 3.0
+
 Add ip scan and tcp port scan feature for a range of IPs.
 
-Version 2.0
+### Version 2.0
+
 Add keepalive, random postfixes for DDoS attack.
 
-Version 1.0
+### Version 1.0
+
 connect slave target port repeats
+
 disconnect slave target port
