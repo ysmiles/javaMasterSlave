@@ -2,6 +2,15 @@
 
 This project is create by Yu Shu mainly for record purpose.
 
+## Introduction
+
+The masterbot and slavebots are all implemented by Java multithreading technique. And they can run at different machines.
+
+Masterbot have only one thread to accept connection request from slavebots. For each slavebot, masterbot has one thread to send 
+command and one thread to receive message (ipscan reply, etc.). The main thread also holds a list of currently connected thread.
+
+Slavebot is also multithreaded. It can communicate with masterbot, as well as connect to multiple other servers, such as a website server.
+
 ### Story
 I'd like to share some little stories about this project.
 
@@ -27,34 +36,49 @@ Run: (go up a folder first)
 java masterslave.masterbot -p 6000
 
 java masterslave.slavebot -p 6000 -h localhost
+```
 
 Tested with following command at master side:
 
-list // list all available slaves.
+```bash
+// list all available slaves.
+list
 
-connect all www.sjsu.edu 80 // let all slaves connect to www.sjsu.edu, each slave creats 1 connection.
+// let all slaves connect to www.sjsu.edu, each slave creats 1 connection.
+connect all www.sjsu.edu 80 
 
-connect all www.sjsu.edu 80 2 // let all slaves connect to www.sjsu.edu, each slave creats 2 connection.
+// let all slaves connect to www.sjsu.edu, each slave creats 2 connection.
+connect all www.sjsu.edu 80 2 
 
-disconnect all www.sjsu.edu 80 // let all slaves disconnect with www.sjsu.edu with port 80
+// let all slaves disconnect with www.sjsu.edu with port 80
+disconnect all www.sjsu.edu 80 
 
-disconnect all www.sjsu.edu // let all slaves disconnect with www.sjsu.edu with all ports
+// let all slaves disconnect with www.sjsu.edu with all ports
+disconnect all www.sjsu.edu 
 
-connect all www.sjsu.edu 80 keepalive // add keepalive option
+// add keepalive option
+connect all www.sjsu.edu 80 keepalive 
 
-connect all www.google.com 80 2 url=/#q= // creat random strings and let google search, drop all replies
+// creat random strings and let google search, drop all replies
+connect all www.google.com 80 2 url=/#q= 
 
-ipscan all 4.2.2.2-4.2.2.8 // let all slaves test a range of IPs (by using ICMP echo)
+// let all slaves test a range of IPs (by using ICMP echo)
+ipscan all 4.2.2.2-4.2.2.8 
 
-ipscan 127.0.0.1 4.2.2.2-4.2.2.8 // let specific slaves test a range of IPs (by using ICMP echo)
+// let specific slaves test a range of IPs (by using ICMP echo)
+ipscan 127.0.0.1 4.2.2.2-4.2.2.8 
 
-ipscan localhost 4.2.2.2-4.2.2.8 // let specific slaves (chose by name) test a range of IPs (by using ICMP echo)
+// let specific slaves (chose by name) test a range of IPs (by using ICMP echo)
+ipscan localhost 4.2.2.2-4.2.2.8 
 
-tcpportscan localhost www.sjsu.edu 79-81 // let specific slaves (chose by name) test a range of TCP ports
+// let specific slaves (chose by name) test a range of TCP ports
+tcpportscan localhost www.sjsu.edu 79-81 
 
-tcpportscan all www.sjsu.edu 79-81 // let all slaves (chose by name) test a range of TCP ports
+// let all slaves (chose by name) test a range of TCP ports
+tcpportscan all www.sjsu.edu 79-81 
 
-geoipscan all 4.2.2.2-4.2.2.8 // test geological information, similar formats as before
+// test geological information, similar formats as before
+geoipscan all 4.2.2.2-4.2.2.8 
 
 geoipscan localhost 4.2.2.2-4.2.2.8
 
