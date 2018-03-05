@@ -1,6 +1,13 @@
-# javaMasterSlave
+# Java Master Slave Application
 
-This project is create by Yu Shu mainly for record purpose.
+This project is create by Yu Shu mainly for record purpose of CMPE206.
+
+## Updates on 3-5-2018
+
+Reorganized codes to fit Intellij IDE. 
+I used Eclipse and shell for developing this project before.
+
+More modifications of codes may be later.
 
 ## Introduction
 
@@ -10,6 +17,36 @@ Masterbot have only one thread to accept connection request from slavebots. For 
 command and one thread to receive message (ipscan reply, etc.). The main thread also holds a list of currently connected thread.
 
 Slavebot is also multithreaded. It can communicate with masterbot, as well as connect to multiple other servers, such as a website server.
+
+## Sample usage
+
+- Master's commands
+
+![mcs](img/m_commands.png)
+
+- A slave connected
+
+![msc](img/m_s_connected.png)
+
+- Master's control
+
+![mco](img/m_control.png)
+
+- Slave's behavior after getting command
+
+![sg](img/s_get.png)
+
+### Interesting test
+
+Master ask a slave to connect itself 100,000 times.
+
+The program of master and slave are both stable after that.
+But since this runs out of sockets (ports) available. 
+For browser, it cannot connect to websites.
+
+Here is part of the list of slave's connections:
+
+![100k](img/100000.png)
 
 ### Story
 I'd like to share some little stories about this project.
