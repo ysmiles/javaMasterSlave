@@ -78,43 +78,43 @@ java masterslave.slavebot -p 6000 -h localhost
 Tested with following command at master side:
 
 ```bash
-// list all available slaves.
+# list all available slaves.
 list
 
-// let all slaves connect to www.sjsu.edu, each slave creats 1 connection.
+# let all slaves connect to www.sjsu.edu, each slave creats 1 connection.
 connect all www.sjsu.edu 80 
 
-// let all slaves connect to www.sjsu.edu, each slave creats 2 connection.
+# let all slaves connect to www.sjsu.edu, each slave creats 2 connection.
 connect all www.sjsu.edu 80 2 
 
-// let all slaves disconnect with www.sjsu.edu with port 80
+# let all slaves disconnect with www.sjsu.edu with port 80
 disconnect all www.sjsu.edu 80 
 
-// let all slaves disconnect with www.sjsu.edu with all ports
+# let all slaves disconnect with www.sjsu.edu with all ports
 disconnect all www.sjsu.edu 
 
-// add keepalive option
+# add keepalive option
 connect all www.sjsu.edu 80 keepalive 
 
-// creat random strings and let google search, drop all replies
+# creat random strings and let Google search, drop all replies
 connect all www.google.com 80 2 url=/#q= 
 
-// let all slaves test a range of IPs (by using ICMP echo)
+# let all slaves test a range of IPs (by using ICMP echo)
 ipscan all 4.2.2.2-4.2.2.8 
 
-// let specific slaves test a range of IPs (by using ICMP echo)
+# let specific slaves test a range of IPs (by using ICMP echo)
 ipscan 127.0.0.1 4.2.2.2-4.2.2.8 
 
-// let specific slaves (chose by name) test a range of IPs (by using ICMP echo)
+# let specific slaves (chose by name) test a range of IPs (by using ICMP echo)
 ipscan localhost 4.2.2.2-4.2.2.8 
 
-// let specific slaves (chose by name) test a range of TCP ports
+# let specific slaves (chose by name) test a range of TCP ports
 tcpportscan localhost www.sjsu.edu 79-81 
 
-// let all slaves (chose by name) test a range of TCP ports
+# let all slaves (chose by name) test a range of TCP ports
 tcpportscan all www.sjsu.edu 79-81 
 
-// test geological information, similar formats as before
+# test geological information, similar formats as before
 geoipscan all 4.2.2.2-4.2.2.8 
 
 geoipscan localhost 4.2.2.2-4.2.2.8
@@ -124,8 +124,7 @@ geoipscan 127.0.0.1 208.80.153.203-208.80.153.205
 
 ### Version 4.0
 
-geoipscan 127.0.0.1 208.80.153.203-208.80.153.205
-// ip of wikipedia
+geoipscan 
 
 ### Version 3.0
 
